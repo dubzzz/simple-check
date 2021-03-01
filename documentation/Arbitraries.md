@@ -3267,6 +3267,26 @@ fc.letrec(tie => ({
 // • {"left":{"left":1517743480,"right":1007350543},"right":{"left":12,"right":2147483643}}
 // • …
 ```
+
+```ts
+import * as fc from 'fast-check';
+
+// Specify recursive type explicitly, since TS cannot infer recursive types
+type Tree = number | { left: Tree; right: Tree };
+// Explicitly specify types of each recursive constructors
+const { tree } = fc.letrec<{
+  tree: Tree;
+  node: { left: Tree; right: Tree };
+  leaf: number;
+}>((tie) => ({
+  tree: fc.oneof(tie('node'), tie('leaf'), tie('leaf')),
+  node: fc.record({
+    left: tie('tree'),
+    right: tie('tree'),
+  }),
+  leaf: fc.nat(),
+}));
+```
 </details>
 
 <details>
