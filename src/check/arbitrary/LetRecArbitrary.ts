@@ -80,8 +80,8 @@ export interface TieFunction<T> {
  * @remarks Since 1.16.0
  * @public
  */
-export function letrec<T>(
-  builder: (tie: TieFunction<T>) => { [K in keyof T]: Arbitrary<T[K]> }
+export function letrec<T, Cb extends TieFunction<T> = TieFunction<T>>(
+  builder: (tie: Cb) => { [K in keyof T]: Arbitrary<T[K]> }
 ): { [K in keyof T]: Arbitrary<T[K]> } {
   const lazyArbs: { [K in keyof T]?: Arbitrary<T[K]> } = Object.create(null);
   const tie = (key: keyof T): Arbitrary<any> => {
