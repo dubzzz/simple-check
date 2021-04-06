@@ -56,6 +56,11 @@ function isLazyArbitrary(arb: Arbitrary<any> | undefined): arb is LazyArbitrary 
   return typeof arb === 'object' && arb !== null && Object.prototype.hasOwnProperty.call(arb, 'underlying');
 }
 
+export interface TieFunction<T> {
+  <K extends keyof T>(key: K): Arbitrary<T[K]>;
+  (key: string): Arbitrary<unknown>;
+}
+
 /**
  * For mutually recursive types
  *
@@ -75,8 +80,8 @@ function isLazyArbitrary(arb: Arbitrary<any> | undefined): arb is LazyArbitrary 
  * @remarks Since 1.16.0
  * @public
  */
-export function letrec<T>(
-  builder: (tie: (key: string) => Arbitrary<unknown>) => { [K in keyof T]: Arbitrary<T[K]> }
+export function letrec<T, Cb extends TieFunction<T> = TieFunction<T>>(
+  builder: (tie: Cb) => { [K in keyof T]: Arbitrary<T[K]> }
 ): { [K in keyof T]: Arbitrary<T[K]> } {
   const lazyArbs: { [K in keyof T]?: Arbitrary<T[K]> } = Object.create(null);
   const tie = (key: keyof T): Arbitrary<any> => {
